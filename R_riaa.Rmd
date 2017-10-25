@@ -1,0 +1,58 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(ggplot2)
+library(gridExtra)
+library(tabplot)
+library(lsr)
+library(corrplot)
+library(dplyr)
+
+setwd("~/riaa_proj")
+riaa = read.csv('riaa_datetimes.csv', stringsAsFactors = FALSE)[,2:16]
+```
+
+```{r}
+summary(riaa)
+```
+
+```{r}
+## table plot all features on sortded SalePrice
+library(plyr)
+riaa <- riaa %>% filter(Group_Type != 'None') %>%  filter(Genre == 'ALTERNATIVE' | Genre == 'POP' | Genre == 'ROCK' | Genre == 'R&B/HIP HOP') %>% arrange(Genre)
+#riaa <- riaa[743:3590,]
+colMtx <- matrix(names(riaa)[1:length(riaa)-1], nrow = 8)
+for (i in 1:ncol(colMtx)) {
+  tableplot(riaa, 
+            select_string = c(colMtx[,i], "Sales"), 
+            sortCol = "Sales", decreasing = TRUE, 
+            nBins = 30)
+}
+```
+
+```{r}
+summary(aov(riaa$Sales ~ riaa$Genre))
+summary(aov(riaa$Sales ~ riaa$Media_Type))
+summary(aov(riaa$Sales ~ riaa$Format_Type))
+
+chisq.test(quiz.data)
+summary(aov(riaa$Media_Type ~ riaa$Format_Type))
+```
+
+```{r}
+x = riaa %>% group_by(Spotify, Genre) %>% summarize(count = n()) #%>% filter(Genre == 'ALBUM' | Genre == 'SINGLE')
+#x = x %>% filter(!(Format_Type == 'VIDEO LONGFORM'))
+x = spread(x, key=Genre, value=count)
+names = x$Spotify
+rownames(x) <- names
+chisq.test(x[-1])
+```
+
+```{r}
+library(dplyr)
+riaa %>% group_by(Genre) %>% summarise(count n())
+```
+
